@@ -40,6 +40,7 @@ const (
 	defaultBecomeMethod_Set  string = "sudo"
 	defaultBecomeUser        string = ""
 	defaultBecomeUser_Set    string = "root"
+	defaultExtraVarsAlt      string = ""
 	defaultForks             int    = 5
 	defaultInventoryFile     string = ""
 	defaultLimit             string = ""
@@ -88,6 +89,7 @@ type ansibleCallArgsShared struct {
 	BecomeMethod      string
 	BecomeUser        string
 	ExtraVars         map[string]interface{}
+	ExtraVarsAlt      string
 	Forks             int
 	InventoryFile     string
 	Limit             string
@@ -227,6 +229,11 @@ func Provisioner() terraform.ResourceProvisioner {
 							Optional: true,
 							Computed: true,
 						},
+						"extra_vars_alt": &schema.Schema{
+							Type:     schema.TypeString,
+							Optional: true,
+							Computed: true,
+						},
 						"forks": &schema.Schema{
 							Type:     schema.TypeInt,
 							Optional: true,
@@ -288,6 +295,11 @@ func Provisioner() terraform.ResourceProvisioner {
 				Type:     schema.TypeMap,
 				Optional: true,
 				Computed: true,
+			},
+			"extra_vars_alt": &schema.Schema{
+				Type:     schema.TypeString,
+				Optional: true,
+				Default:  defaultExtraVarsAlt,
 			},
 			"forks": &schema.Schema{
 				Type:     schema.TypeInt,
@@ -1125,6 +1137,7 @@ func decodeConfig(d *schema.ResourceData) (*provisioner, error) {
 			BecomeMethod:      d.Get("become_method").(string),
 			BecomeUser:        d.Get("become_user").(string),
 			ExtraVars:         getStringMap(d.Get("extra_vars")),
+			ExtraVarsAlt:      d.Get("extra_vars_alt").(string),
 			Forks:             d.Get("forks").(int),
 			InventoryFile:     d.Get("inventory_file").(string),
 			Limit:             d.Get("limit").(string),
@@ -1175,6 +1188,7 @@ func decodePlays(v []interface{}, fallbackInventoryMeta ansibleInventoryMeta, fa
 					BecomeMethod:      withStringFallback(playData["become_method"].(string), defaultBecomeMethod, fallbackArgs.BecomeMethod),
 					BecomeUser:        withStringFallback(playData["become_user"].(string), defaultBecomeUser, fallbackArgs.BecomeUser),
 					ExtraVars:         withStringInterfaceMapFallback(getStringMap(playData["extra_vars"]), fallbackArgs.ExtraVars),
+					ExtraVarsAlt:      withStringFallback(playData["extra_vars_alt"].(string), defaultExtraVarsAlt, fallbackArgs.ExtraVarsAlt),
 					Forks:             withIntFallback(playData["forks"].(int), defaultForks, fallbackArgs.Forks),
 					InventoryFile:     withStringFallback(playData["inventory_file"].(string), defaultInventoryFile, fallbackArgs.InventoryFile),
 					Limit:             withStringFallback(playData["limit"].(string), defaultLimit, fallbackArgs.Limit),

@@ -91,14 +91,32 @@ func (p *play) ToCommand(inventoryFile string, vaultPasswordFile string) (string
 			command = fmt.Sprintf("%s --become-user='%s'", command, defaultBecomeUser_Set)
 		}
 	}
+
 	// extra vars:
-	if len(p.CallArgs.Shared.ExtraVars) > 0 {
-		extraVars, err := json.Marshal(p.CallArgs.Shared.ExtraVars)
+	// We now have two sources for extra vars
+	// Create another variable to aggregate the two sources
+	var extraVars map[string]interface{} = make(map[string]interface{})
+	for k, v := range p.CallArgs.Shared.ExtraVars {
+		extraVars[k] = v
+	}
+
+	var extraVarsAlt map[string]interface{} = make(map[string]interface{})
+	err := json.Unmarshal([]byte(p.CallArgs.Shared.ExtraVarsAlt), &extraVarsAlt)
+	if err != nil {
+		return "", err
+	}
+	for k, v := range extraVarsAlt {
+		extraVars[k] = v
+	}
+
+	if len(extraVars) > 0 {
+		extraVarsBytes, err := json.Marshal(extraVars)
 		if err != nil {
 			return "", err
 		}
-		command = fmt.Sprintf("%s --extra-vars='%s'", command, string(extraVars))
+		command = fmt.Sprintf("%s --extra-vars='%s'", command, string(extraVarsBytes))
 	}
+
 	// forks:
 	if p.CallArgs.Shared.Forks > 0 {
 		command = fmt.Sprintf("%s --forks=%d", command, p.CallArgs.Shared.Forks)
