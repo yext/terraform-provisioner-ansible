@@ -2,7 +2,7 @@ package main
 
 const installerProgramTemplate = `#!/usr/bin/env bash
 if [ -z "$(which ansible-playbook)" ]; then
-  
+
   # only check the cloud boot finished if the directory exists
   if [ -d /var/lib/cloud/instance ]; then
     until [[ -f /var/lib/cloud/instance/boot-finished ]]; do
@@ -38,7 +38,7 @@ else
       pip install $expected_version
     fi
   fi
-  
+
 fi
 `
 
@@ -56,10 +56,6 @@ const inventoryTemplate_Remote = `{{$top := . -}}
 {{end}}`
 
 const inventoryTemplate_Local = `{{$top := . -}}
-{{range .Hosts -}}
-{{.}}
-{{end}}
-
 {{range .Groups -}}
 [{{.}}]
 {{range $top.Hosts -}}

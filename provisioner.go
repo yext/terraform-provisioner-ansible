@@ -1025,7 +1025,7 @@ func (p *provisioner) local_writeInventory(o terraform.UIOutput, connInfo *conne
 		}
 
 		inplaceMeta := ansibleInventoryMeta{
-			Hosts:  []string{connInfo.Host},
+			Hosts:  inventoryMeta.Hosts,
 			Groups: inventoryMeta.Groups,
 		}
 
@@ -1145,7 +1145,7 @@ func decodeConfig(d *schema.ResourceData) (*provisioner, error) {
 			Verbose:           d.Get("verbose").(string),
 		},
 	}
-	p.InventoryMeta = ensureLocalhostInCallArgsHosts(p.InventoryMeta)
+	// p.InventoryMeta = ensureLocalhostInCallArgsHosts(p.InventoryMeta)
 	p.Plays = decodePlays(d.Get("plays").([]interface{}), p.InventoryMeta, p.Shared)
 	return p, nil
 }
@@ -1208,7 +1208,7 @@ func decodePlays(v []interface{}, fallbackInventoryMeta ansibleInventoryMeta, fa
 				Tags:          getStringList(playData["tags"]),
 			},
 		}
-		playToAppend.InventoryMeta = ensureLocalhostInCallArgsHosts(playToAppend.InventoryMeta)
+		//playToAppend.InventoryMeta = ensureLocalhostInCallArgsHosts(playToAppend.InventoryMeta)
 
 		plays = append(plays, playToAppend)
 	}
