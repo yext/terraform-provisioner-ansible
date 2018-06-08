@@ -8,9 +8,9 @@ Ansible with Terraform - remote and local.
 
 ## Install
 
-    mkdir -p $GOPATH/src/github.com/radekg
-    cd $GOPATH/src/github.com/radekg
-    git clone https://github.com/radekg/terraform-provisioner-ansible.git
+    mkdir -p $GOPATH/src/github.com/yext
+    cd $GOPATH/src/github.com/yext
+    git clone https://github.com/yext/terraform-provisioner-ansible.git
     cd terraform-provisioner-ansible
     make install
 
@@ -95,7 +95,7 @@ If `provisioner.local` is not set or `false` (the default), the provisioner will
         private_key = "${file("${path.module}/keys/centos.pem")}"
       }
       provisioner "ansible" {
-        
+
         plays {
           playbook = "/full/path/to/an/ansible/playbook.yaml"
           hosts = ["override.example.com"]
@@ -104,7 +104,7 @@ If `provisioner.local` is not set or `false` (the default), the provisioner will
             override = "vars"
           }
         }
-        
+
         plays {
           module = "some-module"
           hosts = ["override.example.com"]
@@ -139,9 +139,9 @@ When using `provisioner.local = true`, do not set any of these: `use_sudo`, `ski
         user = "centos"
         private_key = "${file("${path.module}/keys/centos.pem")}"
       }
-      
+
       provisioner "ansible" {
-        
+
         plays {
           playbook = "/full/path/to/an/ansible/playbook.yaml"
           hosts = ["override.example.com"]
@@ -150,10 +150,10 @@ When using `provisioner.local = true`, do not set any of these: `use_sudo`, `ski
             override = "vars"
           }
         }
-        
+
         become = "yes"
         local = "yes"
-        
+
       }
     }
 
