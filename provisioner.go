@@ -46,6 +46,7 @@ const (
 	defaultLimit             string = ""
 	defaultVaultPasswordFile string = ""
 	defaultVerbose           string = ""
+	defaultIgnoreSshUsername bool   = false
 
 	defaultPlayEnabled string = yes
 	// playbook only:
@@ -91,6 +92,7 @@ type ansibleCallArgsShared struct {
 	ExtraVars         map[string]interface{}
 	ExtraVarsAlt      string
 	Forks             int
+	IgnoreSshUser     bool
 	InventoryFile     string
 	Limit             string
 	VaultPasswordFile string
@@ -347,6 +349,11 @@ func Provisioner() terraform.ResourceProvisioner {
 				Optional: true,
 				Default:  "", // latest
 			},
+			"ignore_ssh_user": &schema.Schema{
+				Type:     schema.TypeBool,
+				Optional: true,
+				Default:  defaultIgnoreSshUsername,
+			},
 			"local": &schema.Schema{
 				Type:     schema.TypeString,
 				Optional: true,
@@ -427,7 +434,11 @@ func applyFn(ctx context.Context) error {
 			return err
 		}
 
-		if connInfo.User == "" || connInfo.Host == "" {
+		if connInfo.Host == "" {
+			return errors.New("Local mode requires a connection with username and host.")
+		}
+
+		if connInfo.User == "" && !p.Shared.IgnoreSshUser { //
 			return errors.New("Local mode requires a connection with username and host.")
 		}
 
@@ -480,14 +491,15 @@ func applyFn(ctx context.Context) error {
 				}
 
 				command, err := runnable.ToLocalCommand(o, runnablePlayLocalAnsibleArgs{
-					Username:        connInfo.User,
-					Port:            connInfo.Port,
-					PemFile:         pemFile,
-					KnownHostsFile:  knownHostsFile,
-					BastionHost:     bastionHost,
-					BastionPemFile:  bastionPemFile,
-					BastionPort:     bastionPort,
-					BastionUsername: bastionUsername,
+					Username:          connInfo.User,
+					Port:              connInfo.Port,
+					PemFile:           pemFile,
+					KnownHostsFile:    knownHostsFile,
+					BastionHost:       bastionHost,
+					BastionPemFile:    bastionPemFile,
+					BastionPort:       bastionPort,
+					BastionUsername:   bastionUsername,
+					IgnoreSshUsername: p.Shared.IgnoreSshUser,
 				})
 
 				if err != nil {
@@ -1139,6 +1151,7 @@ func decodeConfig(d *schema.ResourceData) (*provisioner, error) {
 			ExtraVars:         getStringMap(d.Get("extra_vars")),
 			ExtraVarsAlt:      d.Get("extra_vars_alt").(string),
 			Forks:             d.Get("forks").(int),
+			IgnoreSshUser:     d.Get("ignore_ssh_user").(bool),
 			InventoryFile:     d.Get("inventory_file").(string),
 			Limit:             d.Get("limit").(string),
 			VaultPasswordFile: d.Get("vault_password_file").(string),

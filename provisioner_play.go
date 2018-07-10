@@ -159,18 +159,22 @@ func (r *runnablePlay) ToLocalCommand(o terraform.UIOutput, rpla runnablePlayLoc
 }
 
 type runnablePlayLocalAnsibleArgs struct {
-	Username        string
-	Port            int
-	PemFile         string
-	KnownHostsFile  string
-	BastionUsername string
-	BastionHost     string
-	BastionPort     int
-	BastionPemFile  string
+	Username          string
+	Port              int
+	PemFile           string
+	KnownHostsFile    string
+	BastionUsername   string
+	BastionHost       string
+	BastionPort       int
+	BastionPemFile    string
+	IgnoreSshUsername bool
 }
 
 func (rpla *runnablePlayLocalAnsibleArgs) ToCommandArguments() string {
-	args := fmt.Sprintf("--user='%s'", rpla.Username)
+	args := ""
+	if !rpla.IgnoreSshUsername {
+		args = fmt.Sprintf("%s --user='%s'", args, rpla.Username)
+	}
 	if rpla.PemFile != "" {
 		args = fmt.Sprintf("%s --private-key='%s'", args, rpla.PemFile)
 	}
